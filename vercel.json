@@ -2,8 +2,8 @@
   "version": 2,
   "functions": {
     "api/strike.js": {
-      "maxDuration": 300,
-      "memory": 3008
+      "maxDuration": 60,
+      "memory": 2048
     }
   },
   "routes": [
