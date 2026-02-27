@@ -1,0 +1,43 @@
+{
+  "description": "SHADOW-FLOOD Target Database - Add any scam URLs here",
+  "last_updated": "2024-01-01",
+  "targets": [
+    {
+      "id": 1,
+      "url": "https://safety-request-appeal-now.surge.sh/",
+      "name": "Meta Privacy Scam",
+      "category": "facebook",
+      "languages": ["English", "Hindi", "Spanish", "Portuguese", "Tamil", "Arabic", "French", "Vietnamese", "Ghanaian (Twi)"],
+      "active": true,
+      "notes": "Multi-language Facebook credential harvester"
+    },
+    {
+      "id": 2,
+      "url": "https://facebook-security-check.com",
+      "name": "FB Security Fake",
+      "category": "facebook",
+      "languages": ["English"],
+      "active": false,
+      "notes": "Example - replace with real target"
+    },
+    {
+      "id": 3,
+      "url": "https://instagram-verify.net",
+      "name": "IG Verification Scam",
+      "category": "instagram",
+      "languages": ["English", "Spanish"],
+      "active": false,
+      "notes": "Example - replace with real target"
+    }
+  ],
+  "blacklist": [
+    "google.com",
+    "facebook.com",
+    "instagram.com",
+    "microsoft.com",
+    "apple.com",
+    "amazon.com",
+    "github.com",
+    "vercel.com"
+  ]
+}
