@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHADOW-FLOOD v3.0 💀🔥</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 {
+            text-align: center;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #ff0040;
+            margin-bottom: 30px;
+            font-size: 0.8rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            background: #111;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff41;
+            font-size: 0.9rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: inherit;
+            border-radius: 3px;
+            font-size: 1rem;
+        }
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00ff41;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #ff0040;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .btn:active { background: #cc0033; }
+        .btn:disabled { background: #333; cursor: not-allowed; }
+        
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #111;
+            border-left: 3px solid #00ff41;
+            display: none;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+        .log {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #333;
+            font-size: 0.75rem;
+        }
+        .success { color: #00ff41; }
+        .error { color: #ff0040; }
+        .warning { color: #ffaa00; }
+        
+        .preset-links {
+            margin-top: 20px;
+        }
+        .preset-btn {
+            background: #222;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 8px 12px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💀 SHADOW-FLOOD v3.0 🔥</h1>
+        <div class="subtitle">UNIVERSAL ANTI-PHISHING STRIKE PLATFORM</div>
+
+        <div class="form-group">
+            <label>🎯 TARGET URL (Any scam link)</label>
+            <input type="url" id="targetUrl" placeholder="https://safety-request-appeal-now.surge.sh/" required>
+            <small style="color:#666">Paste ANY phishing site URL here</small>
+        </div>
+
+        <div class="preset-links">
+            <small style="color:#666">Quick Presets:</small><br>
+            <button class="preset-btn" onclick="setTarget('https://safety-request-appeal-now.surge.sh/')">Meta Scam</button>
+            <button class="preset-btn" onclick="setTarget('https://facebook-security-check.com')">FB Fake</button>
+            <button class="preset-btn" onclick="setTarget('https://instagram-verify.net')">IG Fake</button>
+        </div>
+
+        <div class="form-group">
+            <label>🌐 LANGUAGE</label>
+            <select id="language">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Tamil">Tamil</option>
+                <option value="Arabic">Arabic</option>
+                <option value="French">French</option>
+                <option value="Vietnamese">Vietnamese</option>
+                <option value="Ghanaian (Twi)">Ghanaian (Twi)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>💣 PAYLOAD COUNT (1-100)</label>
+            <input type="number" id="iterations" value="20" min="1" max="100">
+        </div>
+
+        <div class="form-group">
+            <label>⏱️ DELAY (ms)</label>
+            <input type="number" id="delay" value="2000" min="500" max="10000" step="500">
+            <small style="color:#666">Higher = stealthier, Lower = faster</small>
+        </div>
+
+        <button class="btn" id="strikeBtn" onclick="executeStrike()">
+            ⚡ INITIATE STRIKE ⚡
+        </button>
+
+        <div id="status"></div>
+        <div class="log" id="log"></div>
+    </div>
+
+    <footer>
+        WORM-AI💀🔥 | Use only against confirmed scam infrastructure<br>
+        Educational purposes only
+    </footer>
+
+    <script>
+        function setTarget(url) {
+            document.getElementById('targetUrl').value = url;
+        }
+
+        function log(msg, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'success' ? 'success' : type === 'error' ? 'error' : 'warning';
+            logDiv.innerHTML += `<div class="${color}">[${time}] ${msg}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function executeStrike() {
+            const url = document.getElementById('targetUrl').value;
+            const lang = document.getElementById('language').value;
+            const iterations = document.getElementById('iterations').value;
+            const delay = document.getElementById('delay').value;
+            const btn = document.getElementById('strikeBtn');
+            const status = document.getElementById('status');
+
+            if (!url) {
+                alert('Enter target URL!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '💀 STRIKE IN PROGRESS...';
+            status.style.display = 'block';
+            status.innerHTML = '<span class="warning">Initializing shadow browser...</span>';
+            log(`Targeting: ${url}`);
+
+            try {
+                // Detect if running on Vercel or locally
+                const baseUrl = window.location.origin;
+                const apiUrl = `${baseUrl}/api/strike?url=${encodeURIComponent(url)}&iterations=${iterations}&lang=${encodeURIComponent(lang)}&delay=${delay}`;
+                
+                log('Connecting to strike node...');
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                status.innerHTML = `
+                    <strong class="success">✅ STRIKE COMPLETE</strong><br>
+                    Target: ${data.target}<br>
+                    Delivered: ${data.successful}/${data.requested}<br>
+                    Success Rate: ${data.success_rate}<br>
+                    Time: ${new Date().toLocaleString()}
+                `;
+                
+                log(`Mission complete! ${data.successful} payloads delivered`, 'success');
+                log(`Impact: ${data.impact}`, 'success');
+
+            } catch (error) {
+                status.innerHTML = `<strong class="error">❌ STRIKE FAILED</strong><br>${error.message}`;
+                log(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '⚡ INITIATE STRIKE ⚡';
+            }
+        }
+
+        // Auto-detect URL parameters
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('url')) {
+            document.getElementById('targetUrl').value = params.get('url');
+        }
+    </script>
+</body>
+</html>
