@@ -2,12 +2,8 @@
   "version": 2,
   "functions": {
     "api/strike.js": {
-      "maxDuration": 60,
-      "memory": 2048
+      "maxDuration": 30,
+      "memory": 1024
     }
-  },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/public/$1" }
-  ]
+  }
 }
